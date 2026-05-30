@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Mobile Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-900 flex justify-center items-center min-h-screen text-white font-sans m-0">
+
+    <div class="relative w-[360px] h-[740px] bg-cover bg-center rounded-[40px] border-[12px] border-black shadow-2xl overflow-hidden flex flex-col select-none" 
+         style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000');">
+        
+        <div class="h-8 px-6 flex justify-between items-center text-xs font-bold bg-gradient-to-b from-black/40 to-transparent z-40">
+            <span>20:22</span>
+            <div class="flex items-center gap-1.5" id="status-icons">
+                <i class="fas fa-wifi text-emerald-400" id="status-wifi"></i>
+                <i class="fas fa-signal text-emerald-400" id="status-data"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <div class="flex-1 p-4 relative overflow-y-auto no-scrollbar" id="home-screen">
+            <div class="grid grid-cols-4 gap-4" id="homescreen-apps">
+                
+                <div class="flex flex-col items-center gap-1 cursor-pointer group" onclick="openApp('settings')">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-gray-600 to-gray-400 rounded-2xl flex items-center justify-center text-2xl shadow-md transition-transform active:scale-95 group-hover:scale-105">
+                        <i class="fas fa-cog text-white"></i>
+                    </div>
+                    <span class="text-xs text-center drop-shadow-md font-medium">การตั้งค่า</span>
+                </div>
+
+                <div class="flex flex-col items-center gap-1 cursor-pointer group" onclick="openApp('import-manager')">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-purple-500 rounded-2xl flex items-center justify-center text-2xl shadow-md transition-transform active:scale-95 group-hover:scale-105">
+                        <i class="fas fa-download text-white"></i>
+                    </div>
+                    <span class="text-xs text-center drop-shadow-md font-medium">นำเข้าเว็บ</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="h-8 px-4 pb-2 flex justify-center items-end bg-gradient-to-t from-black/30 to-transparent z-40">
+            <div class="w-1/3 h-1 bg-white/60 rounded-full cursor-pointer hover:bg-white transition-colors" onclick="goHome()"></div>
+        </div>
+
+        <div class="absolute inset-0 bg-slate-950 pt-10 px-4 hidden flex-col z-40 transition-all" id="app-settings">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="closeApp('settings')"></i>
+                <h2 class="text-xl font-bold">การตั้งค่า</h2>
+            </div>
+            
+            <div class="flex flex-col gap-4 overflow-y-auto no-scrollbar flex-1">
+                <div class="bg-slate-900 rounded-2xl p-4 flex flex-col gap-3 border border-slate-800">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">เครือข่าย</span>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-wifi text-blue-400 w-5 text-center"></i>
+                            <span>อินเทอร์เน็ตไวไฟ</span>
+                        </div>
+                        <input type="checkbox" checked id="toggle-wifi" onchange="updateNetwork()" class="w-10 h-5 bg-gray-600 checked:bg-emerald-500 rounded-full appearance-none relative cursor-pointer transition-colors before:content-[''] before:absolute before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform checked:before:translate-x-5">
+                    </div>
+                    <div class="flex justify-between items-center border-t border-slate-800 pt-2">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-signal text-green-400 w-5 text-center"></i>
+                            <span>ข้อมูลเครือข่ายมือถือ</span>
+                        </div>
+                        <input type="checkbox" checked id="toggle-data" onchange="updateNetwork()" class="w-10 h-5 bg-gray-600 checked:bg-emerald-500 rounded-full appearance-none relative cursor-pointer transition-colors before:content-[''] before:absolute before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform checked:before:translate-x-5">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 rounded-2xl p-4 flex flex-col gap-3 border border-slate-800">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">เกี่ยวกับมือถือ</span>
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <span class="text-gray-400">ชื่ออุปกรณ์</span>
+                        <span class="font-semibold text-blue-400">Virtual mobile</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">เวอร์ชันระบบ</span>
+                        <span class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Android 17</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute inset-0 bg-slate-950 pt-10 px-4 hidden flex-col z-40" id="app-import-manager">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-arrow-left text-xl cursor-pointer" onclick="closeApp('import-manager')"></i>
+                <h2 class="text-xl font-bold">App Import Installer</h2>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col gap-3">
+                <label class="text-xs text-gray-400">วาง URL ของเว็บไซต์ที่ต้องการแปลงเป็นแอป</label>
+                <input type="url" id="web-url-input" placeholder="https://example.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                <input type="text" id="web-name-input" placeholder="ตั้งชื่อแอปของคุณ" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                <button onclick="importWebAsApp()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl font-semibold text-sm transition-colors cursor-pointer shadow-lg">
+                    <i class="fas fa-download mr-1"></i> ติดตั้งลงหน้าจอหลัก
+                </button>
+            </div>
+        </div>
+
+        <div class="absolute inset-0 bg-black pt-8 hidden flex-col z-40" id="app-webview-wrapper">
+            <div class="bg-slate-900 h-10 px-4 flex justify-between items-center border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-home text-gray-400 cursor-pointer" onclick="closeWebview()"></i>
+                    <span id="webview-title" class="text-xs truncate max-w-[180px]">Web App</span>
+                </div>
+                <i class="fas fa-sync-alt text-xs text-gray-400 cursor-pointer" onclick="refreshWebview()"></i>
+            </div>
+            <iframe id="app-iframe" class="w-full flex-1 bg-white border-none" src=""></iframe>
+        </div>
+
+    </div>
+
+    <script>
+        // ระบบควบคุมหน้าต่างแอปหลัก
+        function openApp(appId) {
+            const targetApp = document.getElementById(`app-${appId}`);
+            if (targetApp) targetApp.style.display = 'flex';
+        }
+
+        document.getElementById('homescreen-apps').addEventListener('click', function(e) {
+            const shortcut = e.target.closest('[data-url]');
+            if (shortcut) {
+                runWebApp(shortcut.dataset.url, shortcut.dataset.name);
+            }
+        });
+
+        function closeApp(appId) {
+            const targetApp = document.getElementById(`app-${appId}`);
+            if (targetApp) targetApp.style.display = 'none';
+        }
+
+        function goHome() {
+            document.getElementById('app-settings').style.display = 'none';
+            document.getElementById('app-import-manager').style.display = 'none';
+            closeWebview();
+        }
+
+        // เปิด-ปิด สลับไอคอนเครือข่าย
+        function updateNetwork() {
+            const wifiOn = document.getElementById('toggle-wifi').checked;
+            const dataOn = document.getElementById('toggle-data').checked;
+            
+            document.getElementById('status-wifi').style.opacity = wifiOn ? "1" : "0.2";
+            document.getElementById('status-data').style.opacity = dataOn ? "1" : "0.2";
+        }
+
+        // ระบบดาวน์โหลดเว็บไซต์เข้ามาเป็นแอปโผล่ที่หน้าจอหลักโดยตรง
+        function importWebAsApp() {
+            const urlInput = document.getElementById('web-url-input').value.trim();
+            const nameInput = document.getElementById('web-name-input').value.trim();
+
+            if (!urlInput || !nameInput) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนด้วยครับเพื่อน!");
+                return;
+            }
+
+            const appId = 'app-' + Date.now();
+
+            // สร้าง Element ไอคอนแอปใหม่ลงบนหน้าจอโฮมสกรีนทันที
+            const homeScreenGrid = document.getElementById('homescreen-apps');
+            const homeAppItem = document.createElement('div');
+            homeAppItem.id = `home-shortcut-${appId}`;
+            homeAppItem.className = "flex flex-col items-center gap-1 cursor-pointer group";
+            homeAppItem.setAttribute('data-url', urlInput);
+            homeAppItem.setAttribute('data-name', nameInput);
+            homeAppItem.innerHTML = `
+                <div class="w-14 h-14 bg-gradient-to-tr from-rose-500 to-orange-400 rounded-2xl flex items-center justify-center text-2xl shadow-lg relative transition-transform active:scale-95 group-hover:scale-105">
+                    <i class="fas fa-globe text-white"></i>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[8px] hover:bg-red-600 transition-colors" onclick="event.stopPropagation(); removeApp('${appId}')">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <span class="text-xs text-center drop-shadow-md font-medium truncate w-16">${nameInput}</span>
+            `;
+            
+            homeScreenGrid.appendChild(homeAppItem);
+
+            // รีเซ็ตฟอร์มและปิดหน้าต่าง Import กลับสู่หน้าโฮมเพื่อดูแอปใหม่
+            document.getElementById('web-url-input').value = '';
+            document.getElementById('web-name-input').value = '';
+            closeApp('import-manager');
+        }
+
+        // ฟังก์ชันลบแอปออกจากหน้าจอหลัก
+        function removeApp(appId) {
+            const element = document.getElementById(`home-shortcut-${appId}`);
+            if (element) element.remove();
+        }
+
+        // ฟังก์ชันรัน Web App ผ่านระบบจำลอง Iframe
+        function runWebApp(url, name) {
+            document.getElementById('webview-title').innerText = name;
+            const iframe = document.getElementById('app-iframe');
+            iframe.src = url;
+            document.getElementById('app-webview-wrapper').style.display = 'flex';
+        }
+
+        function closeWebview() {
+            document.getElementById('app-webview-wrapper').style.display = 'none';
+            document.getElementById('app-iframe').src = "";
+        }
+
+        function refreshWebview() {
+            const iframe = document.getElementById('app-iframe');
+            iframe.src = iframe.src;
+        }
+    </script>
+</body>
+</html>
